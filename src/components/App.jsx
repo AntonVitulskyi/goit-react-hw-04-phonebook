@@ -1,77 +1,67 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
 
 import Container from './Container/Container';
 import ContactList from './ContactList/ContactList';
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+const App = () => {
+  const getContactsFromStorage = () => {
+     if (JSON.parse(localStorage.getItem('contacts') === null)) {
+       return [
+         { name: 'John Wick', number: '777-77-77', id: '1' },
+         { name: 'Wait for me', number: '937-99-92', id: '2' },
+       ];
+     } else {
+ 
+       return JSON.parse(localStorage.getItem('contacts'));
+     }
+   }
+   
+  const [contacts, setContacts] = useState(getContactsFromStorage)
+  const [filter, setFilter] = useState('')
 
-  getContactsFromStorage() {
-    if (JSON.parse(localStorage.getItem('contacts') === null)) {
-      return [
-        { name: 'John Wick', number: '777-77-77', id: '1' },
-        { name: 'Wait for me', number: '937-99-92', id: '2' },
-      ];
-    } else {
-      return JSON.parse(localStorage.getItem('contacts'));
-    }
-  }
 
-  componentDidMount() {
-    this.setState({ contacts: this.getContactsFromStorage() });
-  }
+  useEffect(() => {
+    if(!contacts) return;
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  componentDidUpdate(_, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-
-  onSubmit = newContact => {
-    this.setState(prevState => {
-      if (
-        prevState.contacts.some(contact => {
+ const onSubmit = newContact => {
+      if (contacts.some(contact => {
           return contact.name === newContact.name;
         })
       ) {
         return alert(`${newContact.name} is already in contacts!`);
       }
-      return { contacts: [...prevState.contacts, newContact] };
-    });
+      return setContacts(prevState => [...prevState, newContact])  ;
   };
 
-  onFilterChange = event => {
-    this.setState({ filter: event.target.value });
+ const onFilterChange = event => {
+  setFilter(event.target.value)
   };
 
-  onClickDeleteContact = event => {
-    this.setState(prevState => {
-      return {
-        contacts: prevState.contacts.filter(
-          contact => contact.id !== event.target.id
-        ),
-      };
-    });
+ const onClickDeleteContact = event => {
+      return setContacts( contacts.filter(
+        contact => contact.id !== event.target.id
+      ))
   };
 
-  render() {
     return (
       <>
         <Container>
-          <ContactForm onSubmit={this.onSubmit} />
-          <Filter onFilterChange={this.onFilterChange} />
+          <ContactForm onSubmit={onSubmit} />
+          <Filter onFilterChange={onFilterChange} />
           <ContactList
-            onClickDeleteContact={this.onClickDeleteContact}
-            filter={this.state.filter}
-            contacts={this.state.contacts}
+            onClickDeleteContact={onClickDeleteContact}
+            filter={filter}
+            contacts={contacts}
           />
         </Container>
       </>
     );
-  }
+  
 }
+
+export {App};

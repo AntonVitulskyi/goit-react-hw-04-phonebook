@@ -1,43 +1,41 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { nanoid } from 'nanoid';
 import styles from '../ContactForm/ContactForm.module.css';
 
-export default class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-  };
+export default function ContactForm({onSubmit}){
+  const [name, setName] = useState("")
+  const [number, setNumber] = useState("")
 
-  handleChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+ const handleChange = e => {
+if(e.target.name === "name"){
+  setName(e.target.value)
+} 
+if(e.target.name === "number"){
+  setNumber(e.target.value)
+}
   };
-
-  handleAddContact = e => {
-    const { name, number } = this.state;
+  
+ const handleAddContact = e => {
     e.preventDefault();
     const newContact = {
-      name,
-      number,
+      name: name,
+      number: number,
       id: nanoid(),
     };
-
-    this.props.onSubmit(newContact);
-    this.setState({ name: '', number: '' });
+    onSubmit(newContact);
+    setName('');
+    setNumber('');
   };
 
-  render() {
-    const { name, number } = this.state;
     return (
       <>
         <h2 className={styles.title}>Phonebook</h2>
-        <form className={styles.form} onSubmit={this.handleAddContact}>
+        <form className={styles.form} onSubmit={handleAddContact}>
           <label className={styles.label} htmlFor="">
             <span>Name</span>
             <input
               value={name}
-              onChange={this.handleChange}
+              onChange={handleChange}
               type="text"
               name="name"
               pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
@@ -49,7 +47,7 @@ export default class ContactForm extends Component {
             <span>Number</span>
             <input
               value={number}
-              onChange={this.handleChange}
+              onChange={handleChange}
               type="tel"
               name="number"
               pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
@@ -62,4 +60,5 @@ export default class ContactForm extends Component {
       </>
     );
   }
-}
+
+
